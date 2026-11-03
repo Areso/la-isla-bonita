@@ -1,0 +1,6 @@
+apiVersion: v2
+name: la-isla-bonita
+description: Island population simulation server (Ktor + SQLite)
+type: application
+version: 0.1.0
+appVersion: "latest"

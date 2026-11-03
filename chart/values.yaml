@@ -1,0 +1,33 @@
+image:
+  repository: ghcr.io/areso/la-isla-bonita
+  # Defaults to the chart's appVersion
+  tag: ""
+  pullPolicy: Always
+
+# Needed while the ghcr.io package is private, e.g. [{name: ghcr-pull}]
+imagePullSecrets: []
+
+service:
+  type: ClusterIP
+  port: 8080
+
+# SQLite: the database lives on a single volume, so only one replica can run
+persistence:
+  enabled: true
+  storageClass: do-block-storage
+  size: 1Gi
+  # Keep the volume (and the game) when the release is uninstalled
+  keepOnUninstall: true
+
+javaOpts: "-XX:MaxRAMPercentage=75"
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    memory: 512Mi
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

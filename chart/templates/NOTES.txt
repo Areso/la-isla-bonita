@@ -1,0 +1,12 @@
+la-isla-bonita is deploying to namespace {{ .Release.Namespace }}.
+
+Play from inside the pod (client is in the image):
+
+  kubectl -n {{ .Release.Namespace }} exec -it deploy/{{ include "isla.fullname" . }} -- isla
+
+Or reach it from your machine:
+
+  kubectl -n {{ .Release.Namespace }} port-forward svc/{{ include "isla.fullname" . }} 8080:{{ .Values.service.port }}
+  curl -X POST localhost:8080/world/init
+
+Then run the client against it: ISLA_SERVER=http://localhost:8080
