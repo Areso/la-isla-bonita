@@ -30,6 +30,38 @@ environment variable:
 
 The client takes the server URL as its first argument or `ISLA_SERVER` (default `http://localhost:8080`). Use the `reset` command to start over from 1900 with a fresh population.
 
+## Deploying to Kubernetes
+
+Pushing to `master` builds `ghcr.io/areso/la-isla-bonita` (linux/amd64) via
+`.github/workflows/image.yml`, tagged `latest` and `sha-<commit>`. The image
+runs the server on `0.0.0.0:8080` with the database at `/data/game.db`, and
+also contains the CLI client as `isla`.
+
+The Helm chart in `chart/` deploys one replica (SQLite allows a single writer)
+with the database on a PersistentVolumeClaim (`do-block-storage` by default):
+
+```sh
+helm upgrade --install isla chart -n default
+
+# Play from inside the pod
+kubectl exec -it deploy/isla-la-isla-bonita -- isla
+
+# Or from your machine
+kubectl port-forward svc/isla-la-isla-bonita 8080:8080
+ISLA_SERVER=http://localhost:8080 client/build/install/client/bin/client
+```
+
+| Value | Default | |
+|---|---|---|
+| `image.repository` | `ghcr.io/areso/la-isla-bonita` | |
+| `image.tag` | chart `appVersion` (`latest`) | pin to `sha-<commit>` for reproducible deploys |
+| `imagePullSecrets` | `[]` | needed while the ghcr.io package is private |
+| `persistence.enabled` | `true` | `false` = emptyDir, data lost on restart |
+| `persistence.storageClass` | `do-block-storage` | |
+| `persistence.size` | `1Gi` | |
+| `persistence.keepOnUninstall` | `true` | `helm uninstall` leaves the volume (and the game) in place |
+| `resources` | 100m CPU / 256Mi, limit 512Mi | |
+
 ## Rules
 
 - `init` creates 5000 people on January 1 of the starting year, with a realistic age pyramid;
